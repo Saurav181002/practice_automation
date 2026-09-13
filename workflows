@@ -1,1 +1,36 @@
-kaggle-to-s3.yml
+name: Kaggle to S3
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install kagglehub boto3
+
+      - name: Download Kaggle Dataset
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          python - <<'PY'
+          import kagglehub
+
+          path = kagglehub.dataset_download(
+              "adrianjuliusaluoch/live-european-football-match-results"
+          )
+
+          print("Dataset downloaded to:", path)
+          PY
